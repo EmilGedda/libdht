@@ -8,7 +8,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
     - name: Install prerequisites
       run:  sudo apt-get -y install iwyu clang-tidy-9 cppcheck
 
@@ -26,6 +25,7 @@ jobs:
     - name: Include what you use
       run: |
           wget https://raw.githubusercontent.com/include-what-you-use/include-what-you-use/master/iwyu_tool.py
+          sudo ln -s "$(clang -print-resource-dir)" "$(include-what-you-use -print-resource-dir)"
           OUTPUT=$(python iwyu_tool.py -o clang -p . | sed "/note: #includes\/fwd-decls are correct/d")
           if [ ! -z "$OUTPUT" ]; then
             echo "$OUTPUT"
@@ -34,4 +34,3 @@ jobs:
 
     - name: clang-tidy
       run: clang-tidy-9 src/*
-
