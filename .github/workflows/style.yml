@@ -10,7 +10,7 @@ jobs:
     steps:
 
     - name: Install prerequisites
-      run:  sudo apt-get -y install iwyu clang-tidy cppcheck
+      run:  sudo apt-get -y install iwyu clang-tidy-9 cppcheck
 
     - uses: actions/checkout@v1
 
