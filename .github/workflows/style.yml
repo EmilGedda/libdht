@@ -25,12 +25,13 @@ jobs:
 
     - name: Include what you use
       run: |
-          OUTPUT=$(iwyu_tool.py -o clang -p . | sed "/note: #includes\/fwd-decls are correct/d")
+          wget https://raw.githubusercontent.com/include-what-you-use/include-what-you-use/master/iwyu_tool.py
+          OUTPUT=$(python iwyu_tool.py -o clang -p . | sed "/note: #includes\/fwd-decls are correct/d")
           if [ ! -z "$OUTPUT" ]; then
             echo "$OUTPUT"
             exit 1
           fi
 
     - name: clang-tidy
-      run: clang-tidy src/*
+      run: clang-tidy-9 src/*
 
