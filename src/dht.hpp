@@ -29,10 +29,10 @@ struct iterator {
   auto operator++(int) -> value_type;
   auto operator*() const noexcept -> value_type;
 
-  auto operator==(iterator) const noexcept -> bool;
-  auto operator!=(iterator) const noexcept -> bool;
-  auto operator==(end_iterator) const noexcept -> bool;
-  auto operator!=(end_iterator) const noexcept -> bool;
+  auto operator==(iterator /* unused */) const noexcept -> bool;
+  auto operator!=(iterator /* unused */) const noexcept -> bool;
+  auto operator==(end_iterator /* unused */) const noexcept -> bool;
+  auto operator!=(end_iterator /* unused */) const noexcept -> bool;
 
  private:
   device&  unit;

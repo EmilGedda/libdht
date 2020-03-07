@@ -116,16 +116,16 @@ auto iterator::operator==(end_iterator /* unused */) const noexcept -> bool {
   return false;
 }
 
-auto iterator::operator!=(end_iterator rhs) const noexcept -> bool {
-  return !(*this == rhs);
+auto iterator::operator!=(end_iterator /* unused */) const noexcept -> bool {
+  return true;
 }
 
 auto iterator::operator==(iterator /* unused */) const noexcept -> bool {
-  return false;
+  return true;
 }
 
-auto iterator::operator!=(iterator rhs) const noexcept -> bool {
-  return !(*this == rhs);
+auto iterator::operator!=(iterator /* unused */) const noexcept -> bool {
+  return false;
 }
 
 }  // namespace dht
