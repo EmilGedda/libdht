@@ -13,13 +13,15 @@
 
 namespace dht {
 
+using u8 = std::uint8_t;
+
 namespace {
 
 template <size_t N>
 constexpr auto bitset_to_bytes(const std::bitset<N>& set) {
-  std::array<uint8_t, N / 8> bytes{};
+  std::array<u8, N / 8> bytes{};
   for (int i = 0; i < bytes.size(); i++) {
-    uint8_t current{ 0 };
+    u8 current{ 0 };
     for (int j = 0; j < 8; j++) {
       current = set[i * 8 + j] << j;
     }
@@ -35,13 +37,13 @@ device::device(int pin, const std::string& chip) : pin(pin) {
 }
 
 auto device::poll() -> response {
-  std::array<uint8_t, response_bytecount> data;
+  std::array<u8, response_bytecount>      data;
   auto                                    valid_crc = false;
 
   while (!valid_crc) {
     data          = bitset_to_bytes(read_data());
     auto checksum = data[4];
-    auto crc      = std::accumulate(data.begin(), data.begin() + 4, uint8_t(0));
+    auto crc      = std::accumulate(data.begin(), data.begin() + 4, u8(0));
     valid_crc     = crc == checksum;
     if (!valid_crc) {
       std::cerr << "Invalid CRC reading: got " << std::hex << crc
