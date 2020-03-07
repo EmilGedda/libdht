@@ -39,12 +39,7 @@ struct iterator {
   response r;
 };
 
-inline const std::string default_chip = "/dev/gpiochip0";
-
 struct device {
-  constexpr static auto response_bitcount  = 40;
-  constexpr static auto response_bytecount = response_bitcount / 8;
-
   explicit device(int pin, const std::string& chip = default_chip);
 
   ~device();
@@ -55,6 +50,13 @@ struct device {
   auto static end() noexcept -> end_iterator;
 
  private:
+  constexpr static auto response_bitcount  = 40;
+  constexpr static auto response_bytecount = response_bitcount / 8;
+
+  // both libc++ and libstdc++ has yet to implement
+  // C++20's constexpr std::string
+  inline static const std::string default_chip = "/dev/gpiochip0";
+
   auto read_data() -> std::bitset<response_bitcount>;
 
   int pin;
