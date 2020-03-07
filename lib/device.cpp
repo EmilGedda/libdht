@@ -37,8 +37,8 @@ device::device(int pin, const std::string& chip) : pin(pin) {
 }
 
 auto device::poll() -> response {
-  std::array<u8, response_bytecount>      data;
-  auto                                    valid_crc = false;
+  std::array<u8, response_bytecount> data;
+  auto                               valid_crc = false;
 
   while (!valid_crc) {
     data          = bitset_to_bytes(read_data());
