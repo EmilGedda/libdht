@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: Generate build system
-      run: CXX="${{ matrix.cxx }}" cmake -DCMAKE_BUILD_TYPE="${{ matrix.buildtype }}" -G Ninja .
+      run: CXX="${{ matrix.cxx }}" cmake -DCMAKE_BUILD_TYPE="${{ matrix.buildtype }}" .
 
     - name: Build
       run: cmake --build . --target dht22
