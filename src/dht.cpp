@@ -1,8 +1,6 @@
 #include "dht.hpp"
 
 #include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include <array>
@@ -11,7 +9,6 @@
 #include <cstdint>
 #include <iostream>
 #include <numeric>
-#include <thread>
 
 namespace dht {
 

@@ -17,6 +17,11 @@ if (CMAKE_CXX_CPPCHECK)
     )
 endif()
 
+find_program(CMAKE_CXX_INCLUDE_WHAT_YOU_USE NAMES "include-what-you-use")
+if (CMAKE_CXX_CPPCHECK)
+    message(STATUS "Found include-what-you-use: ${CMAKE_CXX_INCLUDE_WHAT_YOU_USE}")
+endif()
+
 add_library(dht src/dht.cpp)
 
 add_executable(dht22 src/main.cpp)
