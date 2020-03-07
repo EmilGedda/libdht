@@ -1,0 +1,9 @@
+echo Running git-clang-format...
+fmt=$(git clang-format)
+echo "$fmt"
+
+if [[ "$fmt" != "no modified files to format" ]]; then
+    echo Staging formatted files
+    sed 1d <<< "$fmt" | xargs git add
+fi
+
