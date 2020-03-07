@@ -2,11 +2,12 @@
 cmake_minimum_required(VERSION 3.12)
 project(dht CXX)
 
-find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck)
-if (CMAKE_CXX_CPPCHECK)
-    message(STATUS "Found cppcheck: ${CMAKE_CXX_CPPCHECK}")
+find_program(CPPCHECK NAMES cppcheck)
+if (CPPCHECK)
+    message(STATUS "Found cppcheck: ${CPPCHECK}")
     list(
         APPEND CMAKE_CXX_CPPCHECK
+            "${CPPCHECK}"
             "--enable=all"
             "--inline-suppr"
             "--suppress=unusedFunction"
@@ -17,9 +18,10 @@ if (CMAKE_CXX_CPPCHECK)
     )
 endif()
 
-find_program(CMAKE_CXX_INCLUDE_WHAT_YOU_USE NAMES "include-what-you-use")
-if (CMAKE_CXX_CPPCHECK)
-    message(STATUS "Found include-what-you-use: ${CMAKE_CXX_INCLUDE_WHAT_YOU_USE}")
+find_program(IWYU NAMES "include-what-you-use")
+if (IWYU)
+    message(STATUS "Found include-what-you-use: ${IWYU}")
+    list(APPEND CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${IWYU}")
 endif()
 
 add_subdirectory("${PROJECT_SOURCE_DIR}/lib")
