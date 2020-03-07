@@ -1,0 +1,36 @@
+name: Style
+
+on: [pull_request, push]
+
+jobs:
+  build:
+    name: Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Install prerequisites
+      run:  sudo apt-get -y -qq install iwyu clang-tidy cmake jq clang cppcheck
+
+    - uses: actions/checkout@v1
+
+    - name: Generate compilation database
+      run: cmake -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=1 .
+
+    - uses: DoozyX/clang-format-lint-action@v0.5
+      with:
+        source: 'src'
+        extensions: 'hpp,cpp'
+        clangFormatVersion: 9
+
+    - name: Include what you use
+      run: |
+          OUTPUT=$(iwyu_tool.py -o clang -p . | sed "/note: #includes\/fwd-decls are correct/d")
+          if [ ! -z "$OUTPUT" ]; then
+            echo "$OUTPUT"
+            exit 1
+          fi
+
+    - name: clang-tidy
+      run: clang-tidy src/*
+
