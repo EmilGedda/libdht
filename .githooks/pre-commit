@@ -2,6 +2,6 @@ fmt=$(git clang-format)
 
 if [[ "$fmt" != "clang-format did not modify any files" ]] && [[ "$fmt" != "no modified files to format" ]]; then
     echo "$fmt"
-    sed 1d <<< "$fmt" | xargs git add
+    sed 1d <<< "$fmt" | xargs | xargs git add
 fi
 
