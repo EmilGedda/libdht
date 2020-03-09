@@ -1,6 +1,6 @@
-#include <iostream>
+#include <dht/device.hpp>
 
-#include "dht.hpp"
+#include <iostream>
 
 int main(int /* argc */, char** /* argv */) {  // NOLINT
   dht::device dht22{ 2 };

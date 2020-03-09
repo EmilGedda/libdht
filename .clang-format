@@ -35,8 +35,15 @@ Cpp11BracedListStyle: 'false'
 DerivePointerAlignment: 'false'
 FixNamespaceComments: 'true'
 IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex:           '^<dht/'
+    Priority:        1
+  - Regex:           '.h>$'
+    Priority:        2
+  - Regex:           '.*'
+    Priority:        3
 IndentCaseLabels: 'false'
-IndentPPDirectives: None
+IndentPPDirectives: AfterHash
 IndentWidth: '2'
 KeepEmptyLinesAtTheStartOfBlocks: 'false'
 Language: Cpp
@@ -61,5 +68,5 @@ SpacesInParentheses: 'false'
 Standard: Auto
 TabWidth: '2'
 UseTab: Never
-
+MaxEmptyLinesToKeep: 2
 ...

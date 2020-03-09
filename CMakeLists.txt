@@ -22,11 +22,5 @@ if (CMAKE_CXX_CPPCHECK)
     message(STATUS "Found include-what-you-use: ${CMAKE_CXX_INCLUDE_WHAT_YOU_USE}")
 endif()
 
-add_library(dht src/dht.cpp)
-
-add_executable(dht22 src/main.cpp)
-target_link_libraries(dht22 PRIVATE dht)
-
-set_property(TARGET dht22 PROPERTY CXX_STANDARD 20)
-set_property(TARGET dht PROPERTY CXX_STANDARD 20)
-
+add_subdirectory("${PROJECT_SOURCE_DIR}/lib")
+add_subdirectory("${PROJECT_SOURCE_DIR}/src")
