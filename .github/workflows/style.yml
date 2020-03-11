@@ -25,4 +25,4 @@ jobs:
       uses: EmilGedda/include-what-you-use-action@v1.0
 
     - name: clang-tidy
-      run: clang-tidy-9 src/*
+      run: find lib src inc -type f -name '*pp' -exec clang-tidy-9 '{}' +
