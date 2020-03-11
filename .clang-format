@@ -38,10 +38,12 @@ IncludeBlocks: Regroup
 IncludeCategories:
   - Regex:           '^<dht/'
     Priority:        1
-  - Regex:           '.h>$'
+  - Regex:           '^"'
     Priority:        2
-  - Regex:           '.*'
+  - Regex:           '.h>$'
     Priority:        3
+  - Regex:           '.*'
+    Priority:        4
 IndentCaseLabels: 'false'
 IndentPPDirectives: AfterHash
 IndentWidth: '2'
