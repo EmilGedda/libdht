@@ -6,7 +6,12 @@
 #include <iterator>
 #include <string>
 
+/**
+ * @namespace dht
+ * Documentation for dht here.
+ */
 namespace dht {
+
 struct response {
   float humidity    = 0;
   float temperature = 0;
@@ -38,6 +43,9 @@ struct iterator {
   response r;
 };
 
+/**
+ * Represents a DHT device
+ */
 struct device {
   explicit device(gpio_handle gpio);
   explicit device(int pin, const std::string& chip = default_chip);

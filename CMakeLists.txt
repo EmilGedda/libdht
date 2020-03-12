@@ -1,4 +1,5 @@
 # Author: Emil Gedda
+
 cmake_minimum_required(VERSION 3.12)
 project(dht CXX)
 
@@ -24,5 +25,6 @@ if (IWYU)
     list(APPEND CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${IWYU}")
 endif()
 
-add_subdirectory("${PROJECT_SOURCE_DIR}/lib")
-add_subdirectory("${PROJECT_SOURCE_DIR}/src")
+add_subdirectory("lib")
+add_subdirectory("src")
+add_subdirectory("doc")

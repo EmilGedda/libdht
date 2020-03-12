@@ -1,8 +1,14 @@
+#pragma once
+
 #include <linux/gpio.h>
 
 #include <string>
 #include <string_view>
 
+/**
+ * @namespace dht
+ * dht namespace
+ */
 namespace dht {
 
 // both libc++ and libstdc++ has yet to implement
@@ -21,6 +27,9 @@ enum struct request {
   output = GPIOHANDLE_REQUEST_OUTPUT,
 };
 
+/**
+ * gpio_handle does stuff
+ */
 struct gpio_handle {
   explicit gpio_handle(int pin, const std::string& chip = default_chip);
   explicit gpio_handle(const std::string_view& label,
