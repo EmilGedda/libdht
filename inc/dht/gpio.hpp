@@ -16,34 +16,60 @@ namespace dht {
 inline static const std::string default_chip  = "/dev/gpiochip0";
 inline static const std::string default_label = "libdht";
 
-enum struct event {
-  rising_edge  = GPIOEVENT_EVENT_RISING_EDGE,
-  falling_edge = GPIOEVENT_EVENT_FALLING_EDGE,
+enum struct request {
+  rising_edge  = GPIOEVENT_REQUEST_RISING_EDGE,
+  falling_edge = GPIOEVENT_REQUEST_FALLING_EDGE,
   any          = GPIOEVENT_REQUEST_BOTH_EDGES,
 };
 
-enum struct request {
+enum struct direction {
   input  = GPIOHANDLE_REQUEST_INPUT,
   output = GPIOHANDLE_REQUEST_OUTPUT,
 };
 
+enum struct event {};
+
+
 /**
- * gpio_handle does stuff
+ * gpio does stuff
  */
-struct gpio_handle {
-  explicit gpio_handle(int pin, const std::string& chip = default_chip);
-  explicit gpio_handle(const std::string_view& label,
-                       int                     pin,
-                       const std::string&      chip = default_chip);
+struct gpio {
+  explicit gpio(uint32_t pin, const std::string& chip = default_chip);
+  explicit gpio(const std::string_view& label,
+                uint32_t                pin,
+                const std::string&      chip = default_chip);
 
-  ~gpio_handle();
+  ~gpio();
 
-  auto read_event(event = event::any) -> gpioevent_data;
-  auto read_value() -> gpioevent_data;
+  gpio(const gpio&) = delete;
+  auto operator=(const gpio&) -> gpio& = delete;
+  gpio(gpio&& old) noexcept;
 
+  struct reader {
+    explicit reader(const gpioevent_request& req) noexcept;
+    auto listen() -> event;
+
+   private:
+    gpioevent_request req;
+  };
+
+  struct writer {
+    explicit writer(const gpiohandle_request& req) noexcept;
+    void write(bool);
+
+   private:
+    gpiohandle_request req;
+  };
+
+  auto input(request req = request::any) -> reader;
+  auto output(bool default_value = false) -> writer;
 
  private:
-  gpioevent_request req;
+  int              fd;
+  uint32_t         pin;
+  std::string_view label;
 };
+
+struct event_data {};
 
 }  // namespace dht

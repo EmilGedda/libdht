@@ -47,10 +47,8 @@ struct iterator {
  * Represents a DHT device
  */
 struct device {
-  explicit device(gpio_handle gpio);
+  explicit device(gpio&& handle);
   explicit device(int pin, const std::string& chip = default_chip);
-
-  ~device();
 
   auto poll() -> response;
 
@@ -63,8 +61,7 @@ struct device {
 
   auto read_data() -> std::bitset<response_bitcount>;
 
-  int pin;
-  int fd;
+  gpio handle;
 };
 
 }  // namespace dht
