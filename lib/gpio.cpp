@@ -6,18 +6,21 @@
 #include <unistd.h>
 
 #include <algorithm>
-#include <cerrno>
 #include <cstdint>
 #include <cstdio>
-#include <iostream>
+
+// silence IWYU
+using __u8  = uint8_t;
+using __u32 = uint32_t;
 
 namespace dht {
+
 
 gpio::gpio(uint32_t pin, const std::string& chip)
     : gpio(default_label, pin, chip) {
 }
 
-gpio::gpio(gpio&& old) noexcept : fd(old.fd) {
+gpio::gpio(gpio&& old) noexcept : fd(old.fd), pin(old.pin), label(old.label) {
   old.fd = 0;
 }
 
