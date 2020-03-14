@@ -1,0 +1,5 @@
+find_program(IWYU NAMES "include-what-you-use")
+if (IWYU)
+    message(STATUS "Found include-what-you-use: ${IWYU}")
+    list(APPEND CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${IWYU}")
+endif()
