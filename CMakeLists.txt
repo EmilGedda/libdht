@@ -2,7 +2,10 @@
 cmake_minimum_required(VERSION 3.12)
 project(dht CXX)
 
-add_subdirectory("cmake")
+include("cmake/CMakeLists.txt") # Don't create a new scope
 add_subdirectory("lib")
 add_subdirectory("src")
 add_subdirectory("doc")
+add_subdirectory("tests")
+
+enable_testing()
