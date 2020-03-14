@@ -187,7 +187,7 @@ CheckOptions:
   - key:             portability-simd-intrinsics.Suggest
     value:           '0'
   - key:             readability-braces-around-statements.ShortStatementLines
-    value:           '0'
+    value:           '1'
   - key:             readability-function-size.BranchThreshold
     value:           '4294967295'
   - key:             readability-function-size.LineThreshold

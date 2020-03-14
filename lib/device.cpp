@@ -29,7 +29,7 @@ constexpr auto bitset_to_bytes(const std::bitset<N>& set) {
 
 }  // namespace
 
-device::device(gpio&& handle) : handle(std::move(handle)) {
+device::device(gpio_handle&& handle) : handle(std::move(handle)) {
 }
 
 device::device(int pin, const std::string& chip) : handle(pin, chip) {
@@ -60,7 +60,7 @@ auto device::read_data() -> std::bitset<response_bitcount> {
   // https://github.com/torvalds/linux/blob/master/tools/gpio/gpio-event-mon.c
 
   std::bitset<response_bitcount> data;
-  handle.output();
+  handle.write();
   // wait until line is IDLE
   // pull LOW for 18ms
   // pull HIGH for around 30µs.

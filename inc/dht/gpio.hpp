@@ -14,10 +14,10 @@ namespace dht {
 
 // both libc++ and libstdc++ has yet to implement
 // C++20's constexpr std::string
-inline static const std::string default_chip  = "/dev/gpiochip0";
+inline static const std::string default_chip  = "/dev/gpio_handlechip0";
 inline static const std::string default_label = "libdht";
 
-enum struct request {
+enum struct event_request {
   rising_edge  = GPIOEVENT_REQUEST_RISING_EDGE,
   falling_edge = GPIOEVENT_REQUEST_FALLING_EDGE,
   any          = GPIOEVENT_REQUEST_BOTH_EDGES,
@@ -28,49 +28,37 @@ enum struct direction {
   output = GPIOHANDLE_REQUEST_OUTPUT,
 };
 
-enum struct event {};
-
+struct event_data {};
 
 /**
- * gpio does stuff
+ * gpio_handle does stuff
  */
-struct gpio {
-  explicit gpio(uint32_t pin, const std::string& chip = default_chip);
-  explicit gpio(const std::string_view& label,
-                uint32_t                pin,
-                const std::string&      chip = default_chip);
+struct gpio_handle {
+  explicit gpio_handle(uint32_t pin, const std::string& chip = default_chip);
+  explicit gpio_handle(const std::string_view& label,
+                       uint32_t                pin,
+                       const std::string&      chip = default_chip);
 
-  ~gpio();
+  ~gpio_handle();
 
-  gpio(const gpio&) = delete;
-  auto operator=(const gpio&) -> gpio& = delete;
-  gpio(gpio&& old) noexcept;
+  gpio_handle(const gpio_handle&) = delete;
+  gpio_handle(gpio_handle&& old) noexcept;
+  auto operator=(const gpio_handle&) -> gpio_handle& = delete;
 
-  struct reader {
-    explicit reader(const gpioevent_request& req) noexcept;
-    auto listen() -> event;
-
-   private:
-    gpioevent_request req;
-  };
-
-  struct writer {
-    explicit writer(const gpiohandle_request& req) noexcept;
-    void write(bool);
-
-   private:
-    gpiohandle_request req;
-  };
-
-  auto input(request req = request::any) -> reader;
-  auto output(bool default_value = false) -> writer;
+  auto listen(event_request event = event_request::any) -> event_data;
+  void write(bool value = false);
+  void write(int value);
 
  private:
-  int              fd;
+  void set_input(event_request event);
+  void set_output(bool value);
+
   uint32_t         pin;
+  int              chip_fd = -1;
+  int              gpio_fd = -1;
   std::string_view label;
+  direction        port_direction;
 };
 
-struct event_data {};
 
 }  // namespace dht

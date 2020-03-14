@@ -16,74 +16,96 @@ using __u32 = uint32_t;
 namespace dht {
 
 
-gpio::gpio(uint32_t pin, const std::string& chip)
-    : gpio(default_label, pin, chip) {
+gpio_handle::gpio_handle(uint32_t pin, const std::string& chip)
+    : gpio_handle(default_label, pin, chip) {
 }
 
-gpio::gpio(gpio&& old) noexcept : fd(old.fd), pin(old.pin), label(old.label) {
-  old.fd = 0;
+gpio_handle::gpio_handle(gpio_handle&& old) noexcept
+    : pin(old.pin)
+    , chip_fd(old.chip_fd)
+    , gpio_fd(old.gpio_fd)
+    , label(old.label) {
+  old.chip_fd = -1;
+  old.gpio_fd = -1;
 }
 
-gpio::gpio(const std::string_view& label, uint32_t pin, const std::string& chip)
+gpio_handle::gpio_handle(const std::string_view& label,
+                         uint32_t                pin,
+                         const std::string&      chip)
     : pin(pin), label(label) {
-  fd = open(chip.c_str(), O_RDONLY);
-  if (fd == -1) {
-    std::perror("failed to open gpio chip device");
+  chip_fd = open(chip.c_str(), O_RDONLY);
+  if (chip_fd == -1) {
+    std::perror("failed to open gpio_handle chip device");
     throw 1;  // TODO: fix
   }
 }
 
-gpio::~gpio() {
-  if (fd == -1) { return; }
+gpio_handle::~gpio_handle() {
+  if (chip_fd == -1) return;
 
-  auto err = close(fd);
-  if (err == -1) { std::perror("failed to close gpio file descriptor"); }
+  auto err = close(chip_fd);
+  if (err == -1) {
+    std::perror("failed to close gpio_handle file descriptor");
+  }
 }
 
-
-auto gpio::input(request req) -> reader {
+void gpio_handle::set_input(event_request event) {
   gpioevent_request event_request;
 
   event_request.lineoffset  = pin;
-  event_request.eventflags  = static_cast<uint32_t>(req);
+  event_request.eventflags  = static_cast<uint32_t>(event);
   event_request.handleflags = static_cast<uint32_t>(direction::input);
 
   auto n = std::min(label.size(), sizeof(event_request.consumer_label));
   std::copy_n(label.begin(), n, event_request.consumer_label);
 
-  auto ret = ioctl(fd, GPIO_GET_LINEEVENT_IOCTL, &event_request);
+  auto ret = ioctl(chip_fd, GPIO_GET_LINEEVENT_IOCTL, &event_request);
   if (ret == -1) {
     std::perror("unable to issue get line event");
     throw 1;  // TODO: fix
   }
 
-  return reader{ event_request };
+  gpio_fd        = event_request.fd;
+  port_direction = direction::input;
 }
 
-auto gpio::output(bool default_value) -> writer {
+void gpio_handle::set_output(bool value) {
   gpiohandle_request handle_request;
 
-  handle_request.flags             = static_cast<uint32_t>(direction::output);
   handle_request.lines             = 1;
   handle_request.lineoffsets[0]    = pin;
-  handle_request.default_values[0] = static_cast<uint8_t>(default_value);
+  handle_request.default_values[0] = static_cast<uint8_t>(value);
+  handle_request.flags             = static_cast<uint32_t>(direction::output);
 
   auto n = std::min(label.size(), sizeof(handle_request.consumer_label));
   std::copy_n(label.begin(), n, handle_request.consumer_label);
 
-  auto ret = ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &handle_request);
+  auto ret = ioctl(chip_fd, GPIO_GET_LINEHANDLE_IOCTL, &handle_request);
   if (ret == -1) {
     std::perror("unable to issue get line handle");
     throw 1;  // TODO: fix
   }
 
-  return writer{ handle_request };
+  gpio_fd        = handle_request.fd;
+  port_direction = direction::output;
 }
 
-gpio::reader::reader(const gpioevent_request& req) noexcept : req(req) {
+auto gpio_handle::listen(event_request event) -> event_data {
+  if (port_direction != direction::input) {
+    set_input(event);
+  }
+
+  return {};
 }
 
-gpio::writer::writer(const gpiohandle_request& req) noexcept : req(req) {
+auto gpio_handle::write(int value) -> void {
+  write(value != 0);
+}
+
+auto gpio_handle::write(bool value) -> void {
+  if (port_direction != direction::output) {
+    set_output(value);
+  }
 }
 
 }  // namespace dht
