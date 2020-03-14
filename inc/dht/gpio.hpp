@@ -2,6 +2,7 @@
 
 #include <linux/gpio.h>
 
+#include <chrono>
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -23,12 +24,20 @@ enum struct event_request {
   any          = GPIOEVENT_REQUEST_BOTH_EDGES,
 };
 
+enum struct event_type {
+  rising_edge  = GPIOEVENT_EVENT_RISING_EDGE,
+  falling_edge = GPIOEVENT_EVENT_FALLING_EDGE,
+};
+
 enum struct direction {
   input  = GPIOHANDLE_REQUEST_INPUT,
   output = GPIOHANDLE_REQUEST_OUTPUT,
 };
 
-struct event_data {};
+struct event_data {
+  std::chrono::steady_clock::time_point timestamp;
+  event_type type;
+};
 
 /**
  * gpio_handle does stuff
@@ -40,7 +49,6 @@ struct gpio_handle {
                        const std::string&      chip = default_chip);
 
   ~gpio_handle();
-
   gpio_handle(const gpio_handle&) = delete;
   gpio_handle(gpio_handle&& old) noexcept;
   auto operator=(const gpio_handle&) -> gpio_handle& = delete;
