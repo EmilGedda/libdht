@@ -18,4 +18,4 @@ jobs:
       run: CXX="${{ matrix.cxx }}" cmake -DCMAKE_BUILD_TYPE="${{ matrix.buildtype }}" .
 
     - name: Build
-      run: cmake --build . --target dht22
+      run: cmake --build . --target tests

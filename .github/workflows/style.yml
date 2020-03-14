@@ -9,12 +9,15 @@ jobs:
 
     steps:
     - name: Install prerequisites
-      run:  sudo apt-get -y install iwyu clang-tidy-9 cppcheck
+      run:  sudo apt-get -y install clang-tidy-9 # cppcheck segfaults on iterator.cpp
 
     - uses: actions/checkout@v1
 
     - name: Generate compilation database
       run: cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 .
+
+    - name: Compile tests
+      run: cmake --build . --target tests
 
     - name: Run clang format
       uses: DoozyX/clang-format-lint-action@v0.5
