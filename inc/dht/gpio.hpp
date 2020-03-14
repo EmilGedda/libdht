@@ -36,7 +36,7 @@ enum struct direction {
 
 struct event_data {
   std::chrono::steady_clock::time_point timestamp;
-  event_type type;
+  event_type                            type;
 };
 
 /**

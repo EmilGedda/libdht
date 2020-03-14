@@ -6,8 +6,8 @@
 #include <unistd.h>
 
 #include <algorithm>
-#include <chrono>
 #include <cerrno>
+#include <chrono>
 #include <cstdint>
 #include <cstdio>
 
@@ -109,17 +109,17 @@ auto gpio_handle::listen(event_request event) -> event_data {
     }
 
     if (ret != sizeof(data)) {
-      std::printf("reading event data failed. Read %zu bytes, expected %lu bytes\n", sizeof(data), ret);
-      throw 1; // TODO fix
+      std::printf(
+          "reading event data failed. Read %zu bytes, expected %lu bytes\n",
+          sizeof(data),
+          ret);
+      throw 1;  // TODO fix
     }
   }
 
-  return {
-    std::chrono::steady_clock::time_point{
-      std::chrono::nanoseconds{data.timestamp}
-    },
-    static_cast<event_type>(data.id)
-  };
+  return { std::chrono::steady_clock::time_point{
+               std::chrono::nanoseconds{ data.timestamp } },
+           static_cast<event_type>(data.id) };
 }
 
 auto gpio_handle::write(int value) -> void {
