@@ -24,8 +24,5 @@ jobs:
       with:
         source: 'src'
 
-    - name: Run include what you use
-      uses: EmilGedda/include-what-you-use-action@v1.0
-
     - name: clang-tidy
       run: find lib src inc -type f -name '*pp' -exec clang-tidy-9 '{}' +
