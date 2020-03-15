@@ -15,8 +15,8 @@ namespace dht {
 
 // both libc++ and libstdc++ has yet to implement
 // C++20's constexpr std::string
-inline static const std::string default_chip  = "/dev/gpio_handlechip0";
-inline static const std::string default_label = "libdht";
+static const std::string default_chip  = "/dev/gpiochip0";
+static const std::string default_label = "libdht";
 
 enum struct event_request {
   rising_edge  = GPIOEVENT_REQUEST_RISING_EDGE,
@@ -32,6 +32,7 @@ enum struct event_type {
 enum struct direction {
   input  = GPIOHANDLE_REQUEST_INPUT,
   output = GPIOHANDLE_REQUEST_OUTPUT,
+  unknown,
 };
 
 struct event_data {
@@ -48,7 +49,7 @@ struct gpio_handle {
                        uint32_t                pin,
                        const std::string&      chip = default_chip);
 
-  ~gpio_handle();
+  ~gpio_handle() noexcept;
   gpio_handle(const gpio_handle&) = delete;
   gpio_handle(gpio_handle&& old) noexcept;
   auto operator=(const gpio_handle&) -> gpio_handle& = delete;
@@ -57,15 +58,18 @@ struct gpio_handle {
   void write(bool value = false);
   void write(int value);
 
+  auto get_pin() noexcept -> int;
+
  private:
   void set_input(event_request event);
   void set_output(bool value);
+  void try_close_gpio();
 
   uint32_t         pin;
   int              chip_fd = -1;
   int              gpio_fd = -1;
   std::string_view label;
-  direction        port_direction;
+  direction        port_direction = direction::unknown;
 };
 
 
