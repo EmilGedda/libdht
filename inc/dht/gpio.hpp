@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DHT_GPIO_HPP_
+#define DHT_GPIO_HPP_
 
 #include <linux/gpio.h>
 
@@ -74,3 +75,4 @@ struct gpio_handle {
 
 
 }  // namespace dht
+#endif  // DHT_GPIO_HPP_
