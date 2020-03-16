@@ -1,0 +1,37 @@
+name: Documentation
+
+on: [pull_request, push]
+
+jobs:
+  build:
+    name: Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install prerequisites
+      run:  |
+        sudo apt-get -y install doxygen python3-pip python3-sphinx
+        sudo pip3 install breathe sphinx_rtd_theme
+
+    - uses: actions/checkout@v1
+
+    - name: Generate compilation database
+      run: cmake -DCMAKE_MODULE_PATH=/usr/lib/llvm-9/lib/cmake/llvm/ -DCMAKE_EXPORT_COMPILE_COMMANDS=1 .
+
+    - name: Compile tests
+      run: cmake --build . --target docs
+
+    - name: Disable Jekyll generation in Github Pages
+      run: touch doc/docs/sphinx/.nojekyll
+
+    - name: Deploy docs to Github Pages
+      if: github.ref == 'refs/heads/master' && success()
+      uses: peaceiris/actions-gh-pages@v2.10.1
+      env:
+        ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+        PUBLISH_BRANCH: gh-pages
+        PUBLISH_DIR: ./doc/docs/sphinx
+      with:
+        commitMessage: ${{ github.event.head_commit.message }}
+        username: "Github Actions"
+        useremail: "actions@github"

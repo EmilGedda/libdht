@@ -6,12 +6,6 @@
 Welcome to libdht's documentation!
 ==================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
-
 Indices and tables
 ==================
 
@@ -22,13 +16,3 @@ Namespaces
 ====
 
 .. doxygennamespace:: dht
-
-File dht/device.hpp
-====
-
-.. doxygenfile:: device.hpp
-
-
-File dht/gpio.hpp
-====
-.. doxygenfile:: gpio.hpp
