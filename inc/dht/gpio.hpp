@@ -64,7 +64,7 @@ struct gpio_handle {
  private:
   void set_input(event_request event);
   void set_output(bool value);
-  void try_close_gpio();
+  void static try_close(int& fd);
 
   uint32_t         pin;
   int              chip_fd = -1;

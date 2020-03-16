@@ -43,21 +43,15 @@ gpio_handle::gpio_handle(const std::string_view& label,
 }
 
 gpio_handle::~gpio_handle() noexcept {
-  if (chip_fd == -1) return;
-
-  auto err = close(chip_fd);
-  if (err == -1) {
-    std::perror("failed to close gpio_handle chip file descriptor");
-  }
-
-  try_close_gpio();
+  try_close(gpio_fd);
+  try_close(chip_fd);
 }
 
-void gpio_handle::try_close_gpio() {
-  if (gpio_fd < 1) return;
-  auto err = close(gpio_fd);
+void gpio_handle::try_close(int& fd) {
+  if (fd < 1) return;
+  auto err = close(fd);
   if (err == -1) {
-    std::perror("failed to close gpio_handle gpio file descriptor");
+    std::perror("failed to close file descriptor");
   }
 }
 
@@ -82,7 +76,8 @@ void gpio_handle::set_input(event_request event) {
     throw 1;  // TODO: fix
   }
 
-  try_close_gpio();
+  try_close(gpio_fd);
+
   gpio_fd        = req.fd;
   port_direction = direction::input;
 }
@@ -92,27 +87,29 @@ auto gpio_handle::listen(event_request event) -> event_data {
     set_input(event);
   }
 
+  ssize_t        ret;
   gpioevent_data data;
 
-  while (true) {
-    auto ret = read(gpio_fd, &data, sizeof(data));
-    if (ret == -1) {
-      std::perror("failed to read event data");
-      if (errno == -EAGAIN) continue;
-      throw 1;
-    }
+  do {
+    ret = read(gpio_fd, &data, sizeof(data));
+  } while (ret == -1 && errno == -EAGAIN);
 
-    if (ret != sizeof(data)) {
-      std::printf(
-          "reading event data failed. Read %zu bytes, expected %lu bytes\n",
-          sizeof(data),
-          ret);
-      throw 1;  // TODO fix
-    }
-    return { std::chrono::steady_clock::time_point{
-                 std::chrono::nanoseconds{ data.timestamp } },
-             static_cast<event_type>(data.id) };
+  if (ret == -1) {
+    std::perror("failed to read event data");
+    throw 1;
   }
+
+  if (ret != sizeof(data)) {
+    std::printf(
+        "reading event data failed. Read %zu bytes, expected %zd bytes\n",
+        sizeof(data),
+        ret);
+    throw 1;  // TODO fix
+  }
+
+  return { std::chrono::steady_clock::time_point{
+               std::chrono::nanoseconds{ data.timestamp } },
+           static_cast<event_type>(data.id) };
 }
 
 void gpio_handle::set_output(bool value) {
@@ -132,7 +129,8 @@ void gpio_handle::set_output(bool value) {
     throw 1;  // TODO: fix
   }
 
-  try_close_gpio();
+  try_close(gpio_fd);
+
   gpio_fd        = req.fd;
   port_direction = direction::output;
 }
