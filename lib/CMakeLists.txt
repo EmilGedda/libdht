@@ -8,9 +8,10 @@ install(TARGETS dht
         LIBRARY
           DESTINATION lib/dht
         ARCHIVE
-          DESTINATION lib/dht
-        PUBLIC_HEADER
-          DESTINATION include)
+          DESTINATION lib/dht)
+
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/inc/"
+        DESTINATION  include)
 
 install(FILES "${PROJECT_SOURCE_DIR}/LICENSE"
         DESTINATION share/licenses/libdht)
