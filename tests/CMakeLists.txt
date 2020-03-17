@@ -2,8 +2,6 @@ include(CTest)
 
 find_package(Threads REQUIRED)
 
-add_executable(tests main.cpp device_tests.cpp iterator_tests.cpp gpio_tests.cpp)
-
 add_executable(gpio_test EXCLUDE_FROM_ALL gpio_tests.cpp)
 target_link_libraries(gpio_test dht doctest Threads::Threads)
 set_property(TARGET gpio_test PROPERTY CXX_STANDARD 17)
