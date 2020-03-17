@@ -18,9 +18,9 @@ int main(int argc, char** argv) {  // NOLINT
     return -1;
   }
 
-  std::string      chip = argv[1];
-  auto             pin  = std::stoi(argv[2]);
-  dht::gpio_handle handle(pin, chip);
+  auto chip   = argv[1];
+  auto pin    = std::stoi(argv[2]);
+  auto handle = dht::gpio_handle(pin, chip);
 
   std::cout << "Listening on chip " << chip << " pin " << pin << '\n';
   while (true) {
