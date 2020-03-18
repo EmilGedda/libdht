@@ -143,9 +143,20 @@ auto gpio_handle::write(bool value) -> void {
   if (port_direction != direction::output) {
     set_output(value);
   }
+
+  gpiohandle_data data{};
+
+  data.values[0] = static_cast<uint32_t>(value);
+
+  auto ret = ioctl(gpio_fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
+  if (ret == -1) {
+    std::perror("unable to set line values");
+    throw 1;  // TODO: fix
+  }
 }
 
 auto gpio_handle::get_pin() noexcept -> int {
   return pin;
 }
+
 }  // namespace dht

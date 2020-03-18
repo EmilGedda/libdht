@@ -1,5 +1,5 @@
-#ifndef DHT_GPIO_HPP_
-#define DHT_GPIO_HPP_
+#ifndef DHT_GPIO_HPP
+#define DHT_GPIO_HPP
 
 #include <linux/gpio.h>
 
@@ -75,4 +75,4 @@ struct gpio_handle {
 
 
 }  // namespace dht
-#endif  // DHT_GPIO_HPP_
+#endif  // DHT_GPIO_HPP

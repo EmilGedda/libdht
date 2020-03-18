@@ -1,5 +1,5 @@
-#ifndef DHT_DEVICE_HPP_
-#define DHT_DEVICE_HPP_
+#ifndef DHT_DEVICE_HPP
+#define DHT_DEVICE_HPP
 
 #include "gpio.hpp"
 
@@ -67,4 +67,4 @@ struct device {
 
 }  // namespace dht
 
-#endif  // DHT_DEVICE_HPP_
+#endif  // DHT_DEVICE_HPP
