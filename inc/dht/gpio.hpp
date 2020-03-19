@@ -51,8 +51,10 @@ struct gpio_handle {
                        const std::string&      chip = default_chip);
 
   ~gpio_handle() noexcept;
-  gpio_handle(const gpio_handle&) = delete;
   gpio_handle(gpio_handle&& old) noexcept;
+  auto operator=(gpio_handle&& rhs) noexcept -> gpio_handle&;
+
+  gpio_handle(const gpio_handle&) = delete;
   auto operator=(const gpio_handle&) -> gpio_handle& = delete;
 
   auto listen(event_request event = event_request::any) -> event_data;
@@ -60,6 +62,8 @@ struct gpio_handle {
   void write(int value);
 
   auto get_pin() noexcept -> int;
+
+  friend void swap(gpio_handle& a, gpio_handle& b) noexcept;
 
  private:
   void set_input(event_request event);

@@ -10,6 +10,7 @@
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
+#include <utility>
 
 // silence IWYU
 using __u8  = uint8_t;
@@ -22,13 +23,13 @@ gpio_handle::gpio_handle(uint32_t pin, const std::string& chip)
     : gpio_handle(default_label, pin, chip) {
 }
 
-gpio_handle::gpio_handle(gpio_handle&& old) noexcept
-    : pin(old.pin)
-    , chip_fd(old.chip_fd)
-    , gpio_fd(old.gpio_fd)
-    , label(old.label) {
-  old.chip_fd = -1;
-  old.gpio_fd = -1;
+gpio_handle::gpio_handle(gpio_handle&& old) noexcept {
+  swap(*this, old);
+}
+
+auto gpio_handle::operator=(gpio_handle&& rhs) noexcept -> gpio_handle& {
+  swap(*this, rhs);
+  return *this;
 }
 
 gpio_handle::gpio_handle(const std::string_view& label,
@@ -157,6 +158,15 @@ auto gpio_handle::write(bool value) -> void {
 
 auto gpio_handle::get_pin() noexcept -> int {
   return pin;
+}
+
+void swap(gpio_handle& a, gpio_handle& b) noexcept {
+  using std::swap;
+  swap(a.pin, b.pin);
+  swap(a.chip_fd, b.chip_fd);
+  swap(a.gpio_fd, b.gpio_fd);
+  swap(a.label, b.label);
+  swap(a.port_direction, b.port_direction);
 }
 
 }  // namespace dht
