@@ -24,7 +24,7 @@ template <size_t Pins>
 struct virtual_gpio {
   std::string chip;
 
-  virtual_gpio() {
+  void init() {
     std::system("rmmod gpio-mockup -f -s");
     auto existing_chips = get_chips();
 
@@ -50,7 +50,6 @@ struct virtual_gpio {
     }
 
     std::cerr << "Unable to find the virtual gpiochip\n";
-    std::abort();
   }
 
   ~virtual_gpio() {
@@ -102,6 +101,12 @@ struct virtual_gpio {
 
 TEST_CASE("test gpio_handle against virtual gpio") {
   virtual_gpio<4> gpio_mockup;
+
+  try {
+    gpio_mockup.init();
+  } catch (...) {
+    FAIL("Unable to init virtual gpio");
+  }
 
   SUBCASE("test virtual gpio reading and writing") {
     auto pin = gpio_mockup.next_pin();

@@ -15,6 +15,7 @@
 #include <cstring>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 #include <utility>
 
 // silence IWYU
@@ -100,6 +101,7 @@ auto gpio_handle::listen(event_request event, std::chrono::milliseconds timeout)
   } };
 
   auto ret = poll(fds.begin(), 1, timeout.count());
+  auto& pollobj = fds[0];
 
   if (ret == -1) {
     std::string err = std::strerror(errno);
@@ -114,13 +116,14 @@ auto gpio_handle::listen(event_request event, std::chrono::milliseconds timeout)
     throw std::runtime_error("unknown exception occured in listen");
   }
 
-  if ((fds[0].revents & POLLERR) == POLLERR) {
+  if ((pollobj.revents & POLLERR) == POLLERR) {
     std::string err = std::strerror(errno);
     throw std::runtime_error("POLLERR returned from poll(): " + err);
   }
 
-  if ((fds[0].revents & POLLOUT) != POLLOUT) {
-    throw std::runtime_error("poll() returned without any readable data");
+  if ((pollobj.revents & POLLOUT) != POLLOUT) {
+    throw std::runtime_error("poll() returned without any readable data: "
+                             + std::to_string(pollobj.revents));
   }
 
   gpioevent_data data;

@@ -1,4 +1,4 @@
-name: Build
+name: Test
 
 on: [pull_request, push]
 
@@ -14,7 +14,7 @@ jobs:
     steps:
 
     - name: Install prerequisites
-      run:  sudo apt-get -y install clang-9 g++-8 # cppcheck segfaults on iterator.cpp
+      run:  sudo apt-get -y install clang-9 g++-8 rpm # cppcheck segfaults on iterator.cpp
 
     - uses: actions/checkout@v1
 
@@ -23,3 +23,6 @@ jobs:
 
     - name: Build
       run: cmake --build . --target gpio_test
+
+    - name: Run tests
+      run: sudo ctest
