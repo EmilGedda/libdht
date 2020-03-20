@@ -1,11 +1,14 @@
+#include <stdexcept>
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <dht/gpio.hpp>
 
 #include <doctest/doctest.h>
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <condition_variable>
+#include <cstdio>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>  // IWYU pragma: keep
@@ -23,14 +26,27 @@ using namespace dht;
 template <size_t Pins>
 struct virtual_gpio {
   std::string chip;
+  std::string last_stdout;
+
+  void run_proc(const std::string& cmd) {
+    auto        fd = popen(cmd.c_str(), "r");
+    std::string out;
+    while (feof(fd) == 0) {
+      std::array<char, 4096> buffer{};
+      auto                   n = fread(buffer.begin(), 1, buffer.size(), fd);
+      if (n == -1) break;
+      out.append(buffer.begin(), n);
+    }
+    last_stdout = std::move(out);
+  }
 
   void init() {
-    std::system("rmmod gpio-mockup -f -s");
+    run_proc("rmmod gpio-mockup -f -s");
     auto existing_chips = get_chips();
 
-    std::string cmd =
-        "modprobe gpio-mockup gpio_mockup_ranges=-1," + std::to_string(Pins);
-    std::system(cmd.c_str());
+    run_proc("modprobe gpio-mockup gpio_mockup_ranges=-1,"
+             + std::to_string(Pins));
+
     int tries = 0;
 
     while (tries < 3) {
@@ -48,12 +64,11 @@ struct virtual_gpio {
       chip = mocked_chips.front();
       return;
     }
-
-    std::cerr << "Unable to find the virtual gpiochip\n";
+    throw std::runtime_error("Unable to find the virtual gpiochip");
   }
 
   ~virtual_gpio() {
-    std::system("rmmod gpio-mockup -f -s");
+    run_proc("rmmod gpio-mockup -f -s");
   }
 
   auto get_chips() {
@@ -105,7 +120,8 @@ TEST_CASE("test gpio_handle against virtual gpio") {
   try {
     gpio_mockup.init();
   } catch (...) {
-    FAIL("Unable to init virtual gpio");
+    FAIL("Unable to init virtual gpio! Last error:\n"
+         + gpio_mockup.last_stdout);
   }
 
   SUBCASE("test virtual gpio reading and writing") {

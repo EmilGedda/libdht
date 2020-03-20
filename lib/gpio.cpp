@@ -121,7 +121,7 @@ auto gpio_handle::listen(event_request event, std::chrono::milliseconds timeout)
     throw std::runtime_error("POLLERR returned from poll(): " + err);
   }
 
-  if ((pollobj.revents & POLLOUT) != POLLOUT) {
+  if ((pollobj.revents & POLLIN) != POLLIN) {
     throw std::runtime_error("poll() returned without any readable data: "
                              + std::to_string(pollobj.revents));
   }
