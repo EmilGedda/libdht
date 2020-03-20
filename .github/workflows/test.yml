@@ -24,5 +24,5 @@ jobs:
     - name: Build
       run: cmake --build . --target gpio_test
 
-    - name: Run tests
-      run: sudo ctest
+    - name: Run gpio tests
+      run: sudo tests/gpio_test
