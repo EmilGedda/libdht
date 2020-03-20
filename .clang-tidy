@@ -1,5 +1,5 @@
 ---
-Checks:          'clang-diagnostic-*,clang-analyzer-*,modernize-*,performance-*,readability-*,portability-*,bugprone-*,misc-*,-readability-uppercase-literal-suffix,-readability-static-accessed-through-instance'
+Checks:          'clang-diagnostic-*,clang-analyzer-*,modernize-*,performance-*,readability-*,portability-*,bugprone-*,misc-*,-readability-uppercase-literal-suffix,-readability-static-accessed-through-instance,-misc-non-private-member-variables-in-classes,-readability-magic-numbers'
 WarningsAsErrors: ''
 HeaderFilterRegex: '.*'
 AnalyzeTemporaryDtors: false

@@ -5,6 +5,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <exception>
 #include <string>
 #include <string_view>
 
@@ -41,6 +42,7 @@ struct event_data {
   event_type                            type;
 };
 
+using namespace std::chrono_literals;
 /**
  * gpio_handle does stuff
  */
@@ -57,7 +59,8 @@ struct gpio_handle {
   gpio_handle(const gpio_handle&) = delete;
   auto operator=(const gpio_handle&) -> gpio_handle& = delete;
 
-  auto listen(event_request event = event_request::any) -> event_data;
+  auto listen(event_request             event   = event_request::any,
+              std::chrono::milliseconds timeout = 100ms) -> event_data;
   void write(bool value = false);
   void write(int value);
 
@@ -75,6 +78,16 @@ struct gpio_handle {
   int              gpio_fd = -1;
   std::string_view label;
   direction        port_direction = direction::unknown;
+};
+
+struct timeout_exceeded : std::exception {
+  explicit timeout_exceeded(gpio_handle&              handle,
+                            event_request             requested_event,
+                            std::chrono::milliseconds timeout) noexcept;
+
+  gpio_handle&              handle;
+  event_request             requested_event;
+  std::chrono::milliseconds timeout;
 };
 
 

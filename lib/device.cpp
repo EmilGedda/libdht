@@ -3,6 +3,7 @@
 
 #include <array>
 #include <bitset>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -58,24 +59,47 @@ auto device::poll() -> response {
 
 auto device::read_data() -> std::bitset<response_bitcount> {
   // https://github.com/torvalds/linux/blob/master/tools/gpio/gpio-event-mon.c
+  using namespace std::chrono_literals;
+  //  auto low = event_request::falling_edge;
+  //  auto high = event_request::rising_edge;
 
   std::bitset<response_bitcount> data;
-  handle.write();
-  // wait until line is IDLE
-  // pull LOW for 18ms
-  // pull HIGH for around 30µs.
-  // DHT22 responds by pull LOW for 80us.
-  // DHT22 will pull HIGH for 80µs
-  // Next it will send 40 bits of Data. Each bit starts with a 50µs LOW followed
-  // by HIGH for 26-28µs for a “0” or for 70µs for a “1”.
-
-  // i. wait for low (falling edge)
-  for (int i = 0; i < response_bitcount; i++) {
-    // ii.  wait for high (rising edge)
-    // iii. verify time between ii and i (or iv) is 50µs
-    // iv.  wait for low (falling edge)
-    // v.   time between iv and ii determines bit.
-  }
+  std::cout << "Initiating communication...\n"
+            << static_cast<int>(handle.listen().type);
+  //
+  //  // Communication starts at HIGH
+  //  handle.write(1);
+  //  std::this_thread::sleep_for(5ms);
+  //
+  //  // Host pulls LOW for 1ms minimum
+  //  handle.write(0);
+  //  std::this_thread::sleep_for(5ms);
+  //  // Host pulls HIGH for 20-40µs
+  //  handle.write(1);
+  //  // Sensor pulls LOW for 80µs
+  //  auto a = handle.listen(low);
+  //  // if listen() blocks for >40µs, no sensor was found;
+  //
+  //  // Sensor pulls HIGH for 80µs
+  //  auto b = handle.listen(high);
+  //
+  //  // Next it will send 40 bits of Data. Each bit starts with a 50µs LOW
+  //  followed
+  //  // by HIGH for 26-28µs for a “0” or for 70µs for a “1”.
+  //  // i. wait for low (falling edge)
+  //  a = handle.listen(event_request::falling_edge);
+  //  for (int i = 0; i < response_bitcount; i++) {
+  //    // ii.  wait for high (rising edge)
+  //    b = handle.listen(event_request::rising_edge);
+  //    // iii. verify time between ii and i (or iv) is 50µs
+  //    // iv.  wait for low (falling edge)
+  //    a = handle.listen(event_request::falling_edge);
+  //    // v.   time between iv and ii determines bit.
+  //    auto duration = a.timestamp - b.timestamp;
+  //    if (duration < 75us && duration > 65us) {
+  //      data.set(i);
+  //    }
+  //  }
 
   // After communication ends, the Line is pulled HIGH by the pull-up resistor
   // and enters IDLE state.

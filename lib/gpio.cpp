@@ -2,14 +2,19 @@
 
 #include <fcntl.h>
 #include <linux/gpio.h>
+#include <poll.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
 #include <algorithm>
+#include <array>
 #include <cerrno>
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
+#include <cstring>
+#include <sstream>
+#include <stdexcept>
 #include <utility>
 
 // silence IWYU
@@ -36,10 +41,9 @@ gpio_handle::gpio_handle(const std::string_view& label,
                          uint32_t                pin,
                          const std::string&      chip)
     : pin(pin), label(label) {
-  chip_fd = open(chip.c_str(), O_RDWR);
+  chip_fd = open(chip.c_str(), O_RDWR | O_CLOEXEC);
   if (chip_fd == -1) {
-    std::perror("failed to open gpio_handle chip device");
-    throw 1;  // TODO: fix
+    throw std::runtime_error("unable to open gpio chip");  // TODO: fix
   }
 }
 
@@ -52,7 +56,7 @@ void gpio_handle::try_close(int& fd) {
   if (fd < 1) return;
   auto err = close(fd);
   if (err == -1) {
-    std::perror("failed to close file descriptor");
+    std::perror("try_close(): failed to close file descriptor");
   }
 }
 
@@ -68,13 +72,14 @@ void gpio_handle::set_input(event_request event) {
 
   auto ret = ioctl(chip_fd, GPIO_GET_LINEEVENT_IOCTL, &req);
   if (ret == -1) {
-    std::perror("unable to issue get line event");
-    throw 1;  // TODO: fix
+    std::string error = std::strerror(errno);
+    throw std::runtime_error("set_input(): unable to issue get line event: "
+                             + error);
   }
 
   if (req.fd < 1) {
-    std::perror("get line event returned invalid gpio file descriptor");
-    throw 1;  // TODO: fix
+    throw std::runtime_error(
+        "get line event returned invalid gpio file descriptor");
   }
 
   try_close(gpio_fd);
@@ -83,29 +88,55 @@ void gpio_handle::set_input(event_request event) {
   port_direction = direction::input;
 }
 
-auto gpio_handle::listen(event_request event) -> event_data {
+auto gpio_handle::listen(event_request event, std::chrono::milliseconds timeout)
+    -> event_data {
   if (port_direction != direction::input) {
     set_input(event);
   }
 
-  ssize_t        ret;
-  gpioevent_data data;
+  std::array fds = { pollfd{
+      gpio_fd,
+      POLLIN,
+  } };
 
-  do {
-    ret = read(gpio_fd, &data, sizeof(data));
-  } while (ret == -1 && errno == -EAGAIN);
+  auto ret = poll(fds.begin(), 1, timeout.count());
 
   if (ret == -1) {
-    std::perror("failed to read event data");
-    throw 1;
+    std::string err = std::strerror(errno);
+    throw std::runtime_error("poll() returned -1: " + err);
+  }
+
+  if (ret == 0) {
+    throw timeout_exceeded{ *this, event, timeout };
+  }
+
+  if (ret != 1) {
+    throw std::runtime_error("unknown exception occured in listen");
+  }
+
+  if ((fds[0].revents & POLLERR) == POLLERR) {
+    std::string err = std::strerror(errno);
+    throw std::runtime_error("POLLERR returned from poll(): " + err);
+  }
+
+  if ((fds[0].revents & POLLOUT) != POLLOUT) {
+    throw std::runtime_error("poll() returned without any readable data");
+  }
+
+  gpioevent_data data;
+  ret = read(gpio_fd, &data, sizeof(data));
+
+  if (ret == -1) {
+    using namespace std::string_literals;
+    throw std::runtime_error("listen() failed to read data: "s
+                             + std::strerror(errno));
   }
 
   if (ret != sizeof(data)) {
-    std::printf(
-        "reading event data failed. Read %zu bytes, expected %zd bytes\n",
-        sizeof(data),
-        ret);
-    throw 1;  // TODO fix
+    std::ostringstream ss;
+    ss << "reading event data failed. Read " << ret << ", expected "
+       << sizeof(data) << " bytes";
+    throw std::runtime_error(ss.str());
   }
 
   return { std::chrono::steady_clock::time_point{
@@ -126,8 +157,8 @@ void gpio_handle::set_output(bool value) {
 
   auto ret = ioctl(chip_fd, GPIO_GET_LINEHANDLE_IOCTL, &req);
   if (ret == -1) {
-    std::perror("unable to issue get line handle");
-    throw 1;  // TODO: fix
+    std::string err = std::strerror(errno);
+    throw std::runtime_error("set_output(): unable to get line handle: " + err);
   }
 
   try_close(gpio_fd);
@@ -151,8 +182,8 @@ auto gpio_handle::write(bool value) -> void {
 
   auto ret = ioctl(gpio_fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
   if (ret == -1) {
-    std::perror("unable to set line values");
-    throw 1;  // TODO: fix
+    std::string err = std::strerror(errno);
+    throw std::runtime_error("write(): unable to set line values: " + err);
   }
 }
 
@@ -167,6 +198,13 @@ void swap(gpio_handle& a, gpio_handle& b) noexcept {
   swap(a.gpio_fd, b.gpio_fd);
   swap(a.label, b.label);
   swap(a.port_direction, b.port_direction);
+}
+
+
+timeout_exceeded::timeout_exceeded(gpio_handle&              handle,
+                                   event_request             requested_event,
+                                   std::chrono::milliseconds timeout) noexcept
+    : handle(handle), requested_event(requested_event), timeout(timeout) {
 }
 
 }  // namespace dht

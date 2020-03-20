@@ -182,4 +182,10 @@ TEST_CASE("test gpio_handle against virtual gpio") {
 
     pin_hammer.join();
   }
+
+  SUBCASE("timeout in listen") {
+    auto handle = gpio_mockup.new_handle();
+    CHECK_THROWS_AS(handle.listen(event_request::any, 1ms), timeout_exceeded);
+    CHECK_THROWS_AS(handle.listen(event_request::any, 10ms), timeout_exceeded);
+  }
 }
